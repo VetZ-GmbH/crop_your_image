@@ -374,7 +374,10 @@ class _CropEditorState extends State<_CropEditor> {
 
   /// apply crop rect changed to view state
   void _updateCropRect(CropEditorViewState state) {
-    if (state is! ReadyCropEditorViewState) return;
+    setState(() => _viewState = state);
+    widget.onMoved?.call(_readyState.cropRect, _readyState.rectToCrop);
+
+    if (state is! ReadyCropEditorViewState || widget.minHeight == null || widget.minWidth == null) return;
 
     final readyState = state;
 
@@ -387,8 +390,8 @@ class _CropEditorState extends State<_CropEditor> {
       newCropRect.height * readyState.screenSizeRatio / readyState.scale,
     );
 
-    final minWInImageCoords = widget.minWidth ?? 128.0;
-    final minHInImageCoords = widget.minHeight ?? 128.0;
+    final minWInImageCoords = widget.minWidth!;
+    final minHInImageCoords = widget.minHeight!;
 
     double left = newRectToCrop.left;
     double top = newRectToCrop.top;
