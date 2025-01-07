@@ -374,10 +374,13 @@ class _CropEditorState extends State<_CropEditor> {
 
   /// apply crop rect changed to view state
   void _updateCropRect(CropEditorViewState state) {
-    setState(() => _viewState = state);
-    widget.onMoved?.call(_readyState.cropRect, _readyState.rectToCrop);
-
-    if (state is! ReadyCropEditorViewState || widget.minHeight == null || widget.minWidth == null) return;
+    if (state is! ReadyCropEditorViewState || widget.minHeight == null || widget.minWidth == null) {
+      setState(() => _viewState = state);
+      if (state is ReadyCropEditorViewState) {
+        widget.onMoved?.call(state.cropRect, state.rectToCrop);
+      }
+      return;
+    }
 
     final readyState = state;
 
@@ -407,20 +410,48 @@ class _CropEditorState extends State<_CropEditor> {
 
     final clampedRectInImage = Rect.fromLTWH(left, top, width, height);
 
-    final clampedRectInViewport = Rect.fromLTWH(
+    var clampedRectInViewport = Rect.fromLTWH(
       readyState.imageRect.left + clampedRectInImage.left / readyState.screenSizeRatio * readyState.scale,
       readyState.imageRect.top + clampedRectInImage.top / readyState.screenSizeRatio * readyState.scale,
       clampedRectInImage.width / readyState.screenSizeRatio * readyState.scale,
       clampedRectInImage.height / readyState.screenSizeRatio * readyState.scale,
     );
 
-    final updated = readyState.copyWith(cropRect: clampedRectInViewport);
+    final imageRect = readyState.imageRect;
+    double leftVp = clampedRectInViewport.left;
+    double topVp = clampedRectInViewport.top;
+    double widthVp = clampedRectInViewport.width;
+    double heightVp = clampedRectInViewport.height;
+
+    double rightVp = leftVp + widthVp;
+    double bottomVp = topVp + heightVp;
+
+    if (leftVp < imageRect.left) {
+      leftVp = imageRect.left;
+      rightVp = leftVp + widthVp;
+    }
+    if (topVp < imageRect.top) {
+      topVp = imageRect.top;
+      bottomVp = topVp + heightVp;
+    }
+    if (rightVp > imageRect.right) {
+      rightVp = imageRect.right;
+      leftVp = rightVp - widthVp;
+    }
+    if (bottomVp > imageRect.bottom) {
+      bottomVp = imageRect.bottom;
+      topVp = bottomVp - heightVp;
+    }
+
+    clampedRectInViewport = Rect.fromLTWH(leftVp, topVp, widthVp, heightVp);
+
+    final finalState = readyState.copyWith(cropRect: clampedRectInViewport);
 
     setState(() {
-      _viewState = updated;
+      _viewState = finalState;
     });
 
-    widget.onMoved?.call(updated.cropRect, updated.rectToCrop);
+    widget.onMoved?.call(finalState.cropRect, finalState.rectToCrop);
   }
 
   /// reset image to be cropped
