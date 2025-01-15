@@ -150,8 +150,8 @@ class Crop extends StatelessWidget {
   /// The rendering quality of the image
   final FilterQuality filterQuality;
 
-  final double? minWidth;
-  final double? minHeight;
+  /// Defines the minimum allowed crop area dimensions (width and height) for the image.
+  final Size? minCroppedImageSize;
 
   Crop({
     super.key,
@@ -179,8 +179,7 @@ class Crop extends StatelessWidget {
     ImageParser? imageParser,
     this.scrollZoomSensitivity = 0.05,
     this.overlayBuilder,
-    this.minWidth,
-    this.minHeight,
+    this.minCroppedImageSize,
     this.filterQuality = FilterQuality.medium,
   })  : this.imageParser = imageParser ?? defaultImageParser,
         this.formatDetector = formatDetector ?? defaultFormatDetector;
@@ -221,8 +220,7 @@ class Crop extends StatelessWidget {
             imageParser: imageParser,
             overlayBuilder: overlayBuilder,
             filterQuality: filterQuality,
-            minWidth: minWidth,
-            minHeight: minHeight,
+            minCroppedImageSize: minCroppedImageSize,
           ),
         );
       },
@@ -256,9 +254,7 @@ class _CropEditor extends StatefulWidget {
   final double scrollZoomSensitivity;
   final OverlayBuilder? overlayBuilder;
   final FilterQuality filterQuality;
-
-  final double? minWidth;
-  final double? minHeight;
+  final Size? minCroppedImageSize;
 
   const _CropEditor({
     super.key,
@@ -286,8 +282,7 @@ class _CropEditor extends StatefulWidget {
     required this.imageParser,
     required this.scrollZoomSensitivity,
     required this.filterQuality,
-    required this.minWidth,
-    required this.minHeight,
+    required this.minCroppedImageSize,
     this.overlayBuilder,
   });
 
@@ -374,7 +369,7 @@ class _CropEditorState extends State<_CropEditor> {
 
   /// apply crop rect changed to view state
   void _updateCropRect(CropEditorViewState state) {
-    if (state is! ReadyCropEditorViewState || widget.minHeight == null || widget.minWidth == null) {
+    if (state is! ReadyCropEditorViewState || widget.minCroppedImageSize == null) {
       setState(() => _viewState = state);
       if (state is ReadyCropEditorViewState) {
         widget.onMoved?.call(state.cropRect, state.rectToCrop);
@@ -393,8 +388,8 @@ class _CropEditorState extends State<_CropEditor> {
       newCropRect.height * readyState.screenSizeRatio / readyState.scale,
     );
 
-    final minWInImageCoords = widget.minWidth!;
-    final minHInImageCoords = widget.minHeight!;
+    final minWInImageCoords = widget.minCroppedImageSize!.width;
+    final minHInImageCoords = widget.minCroppedImageSize!.height;
 
     double left = newRectToCrop.left;
     double top = newRectToCrop.top;
