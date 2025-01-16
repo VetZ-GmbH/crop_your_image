@@ -376,9 +376,10 @@ class _CropEditorState extends State<_CropEditor> {
   /// the crop rectangle if it falls below the minimum allowed dimensions,
   /// so that the final cropped image is never smaller than the set minimum size.
   void _updateCropRect(CropEditorViewState state) {
+    final minCroppedImageSize = widget.minCroppedImageSize;
+
     // If the state is not ready or no minimum size is set, proceed with the normal update.
-    if (state is! ReadyCropEditorViewState ||
-        widget.minCroppedImageSize == null) {
+    if (state is! ReadyCropEditorViewState || minCroppedImageSize == null) {
       setState(() => _viewState = state);
       if (state is ReadyCropEditorViewState) {
         widget.onMoved?.call(state.cropRect, state.rectToCrop);
@@ -405,8 +406,8 @@ class _CropEditorState extends State<_CropEditor> {
     );
 
     // Get the minimum width and height in image coordinates.
-    final minWInImageCoords = widget.minCroppedImageSize!.width;
-    final minHInImageCoords = widget.minCroppedImageSize!.height;
+    final minWInImageCoords = minCroppedImageSize.width;
+    final minHInImageCoords = minCroppedImageSize.height;
 
     // Initialize variables for the rectangle in image coordinates.
     double left = newRectToCrop.left;
