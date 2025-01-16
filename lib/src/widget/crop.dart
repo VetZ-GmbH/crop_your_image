@@ -370,7 +370,13 @@ class _CropEditorState extends State<_CropEditor> {
   }
 
   /// apply crop rect changed to view state
+  ///
+  /// This function updates the crop rectangle while ensuring that the resulting
+  /// cropped image meets a specified minimum size. The idea is to adjust
+  /// the crop rectangle if it falls below the minimum allowed dimensions,
+  /// so that the final cropped image is never smaller than the set minimum size.
   void _updateCropRect(CropEditorViewState state) {
+    // If the state is not ready or no minimum size is set, proceed with the normal update.
     if (state is! ReadyCropEditorViewState ||
         widget.minCroppedImageSize == null) {
       setState(() => _viewState = state);
@@ -380,10 +386,13 @@ class _CropEditorState extends State<_CropEditor> {
       return;
     }
 
+    // Cast the state to a ready state to access its properties safely.
     final readyState = state;
 
+    // Get the current crop rectangle from the state.
     final newCropRect = readyState.cropRect;
 
+    // Convert the viewport-based crop rectangle to image-based coordinates.
     final newRectToCrop = Rect.fromLTWH(
       (newCropRect.left - readyState.imageRect.left) *
           readyState.screenSizeRatio /
@@ -395,14 +404,17 @@ class _CropEditorState extends State<_CropEditor> {
       newCropRect.height * readyState.screenSizeRatio / readyState.scale,
     );
 
+    // Get the minimum width and height in image coordinates.
     final minWInImageCoords = widget.minCroppedImageSize!.width;
     final minHInImageCoords = widget.minCroppedImageSize!.height;
 
+    // Initialize variables for the rectangle in image coordinates.
     double left = newRectToCrop.left;
     double top = newRectToCrop.top;
     double width = newRectToCrop.width;
     double height = newRectToCrop.height;
 
+    // Adjust the width and height if they are smaller than the minimum allowed.
     if (width < minWInImageCoords) {
       width = minWInImageCoords;
     }
@@ -410,8 +422,10 @@ class _CropEditorState extends State<_CropEditor> {
       height = minHInImageCoords;
     }
 
+    // Create a new rectangle with the adjusted dimensions in image coordinates.
     final clampedRectInImage = Rect.fromLTWH(left, top, width, height);
 
+    // Convert the adjusted image-based rectangle back to viewport coordinates.
     var clampedRectInViewport = Rect.fromLTWH(
       readyState.imageRect.left +
           clampedRectInImage.left /
@@ -425,6 +439,7 @@ class _CropEditorState extends State<_CropEditor> {
       clampedRectInImage.height / readyState.screenSizeRatio * readyState.scale,
     );
 
+    // Ensure that the new viewport rectangle stays within the bounds of the image.
     final imageRect = readyState.imageRect;
     double leftVp = clampedRectInViewport.left;
     double topVp = clampedRectInViewport.top;
@@ -434,6 +449,7 @@ class _CropEditorState extends State<_CropEditor> {
     double rightVp = leftVp + widthVp;
     double bottomVp = topVp + heightVp;
 
+    // Correct the rectangle if it extends beyond the left or top edges of the image.
     if (leftVp < imageRect.left) {
       leftVp = imageRect.left;
       rightVp = leftVp + widthVp;
@@ -442,6 +458,7 @@ class _CropEditorState extends State<_CropEditor> {
       topVp = imageRect.top;
       bottomVp = topVp + heightVp;
     }
+    // Correct the rectangle if it extends beyond the right or bottom edges of the image.
     if (rightVp > imageRect.right) {
       rightVp = imageRect.right;
       leftVp = rightVp - widthVp;
@@ -451,10 +468,13 @@ class _CropEditorState extends State<_CropEditor> {
       topVp = bottomVp - heightVp;
     }
 
+    // Create the final clamped rectangle within viewport coordinates.
     clampedRectInViewport = Rect.fromLTWH(leftVp, topVp, widthVp, heightVp);
 
+    // Create a new state with the updated crop rectangle.
     final finalState = readyState.copyWith(cropRect: clampedRectInViewport);
 
+    // Update the view state and notify listeners of the change.
     setState(() {
       _viewState = finalState;
     });
