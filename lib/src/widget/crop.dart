@@ -18,8 +18,7 @@ typedef History = ({int undoCount, int redoCount});
 typedef HistoryChangedCallback = void Function(History history);
 
 typedef WillUpdateScale = bool Function(double newScale);
-typedef CornerDotBuilder = Widget Function(
-    double size, EdgeAlignment edgeAlignment);
+typedef CornerDotBuilder = Widget Function(double size, EdgeAlignment edgeAlignment);
 
 typedef CroppingRectBuilder = ViewportBasedRect Function(
   ViewportBasedRect viewportRect,
@@ -302,8 +301,7 @@ class _CropEditorState extends State<_CropEditor> {
   /// history is stored when zoom / pan is changed, as well as crop rect moved.
   late final HistoryState _historyState;
 
-  ReadyCropEditorViewState get _readyState =>
-      _viewState as ReadyCropEditorViewState;
+  ReadyCropEditorViewState get _readyState => _viewState as ReadyCropEditorViewState;
 
   /// image with detail info parsed with [widget.imageParser]
   ImageDetail? _parsedImageDetail;
@@ -395,12 +393,8 @@ class _CropEditorState extends State<_CropEditor> {
 
     // Convert the viewport-based crop rectangle to image-based coordinates.
     final newRectToCrop = Rect.fromLTWH(
-      (newCropRect.left - readyState.imageRect.left) *
-          readyState.screenSizeRatio /
-          readyState.scale,
-      (newCropRect.top - readyState.imageRect.top) *
-          readyState.screenSizeRatio /
-          readyState.scale,
+      (newCropRect.left - readyState.imageRect.left) * readyState.screenSizeRatio / readyState.scale,
+      (newCropRect.top - readyState.imageRect.top) * readyState.screenSizeRatio / readyState.scale,
       newCropRect.width * readyState.screenSizeRatio / readyState.scale,
       newCropRect.height * readyState.screenSizeRatio / readyState.scale,
     );
@@ -428,14 +422,8 @@ class _CropEditorState extends State<_CropEditor> {
 
     // Convert the adjusted image-based rectangle back to viewport coordinates.
     var clampedRectInViewport = Rect.fromLTWH(
-      readyState.imageRect.left +
-          clampedRectInImage.left /
-              readyState.screenSizeRatio *
-              readyState.scale,
-      readyState.imageRect.top +
-          clampedRectInImage.top /
-              readyState.screenSizeRatio *
-              readyState.scale,
+      readyState.imageRect.left + clampedRectInImage.left / readyState.screenSizeRatio * readyState.scale,
+      readyState.imageRect.top + clampedRectInImage.top / readyState.screenSizeRatio * readyState.scale,
       clampedRectInImage.width / readyState.screenSizeRatio * readyState.scale,
       clampedRectInImage.height / readyState.screenSizeRatio * readyState.scale,
     );
@@ -524,9 +512,7 @@ class _CropEditorState extends State<_CropEditor> {
     required FormatDetector? formatDetector,
     required Uint8List image,
   }) async {
-    if (_lastParser == parser &&
-        _lastImage == image &&
-        _lastFormatDetector == formatDetector) {
+    if (_lastParser == parser && _lastImage == image && _lastFormatDetector == formatDetector) {
       // no change
       return _parsedImageDetail;
     }
@@ -686,8 +672,7 @@ class _CropEditorState extends State<_CropEditor> {
   void _handlePointerSignal(PointerSignalEvent signal) {
     if (signal is PointerScrollEvent) {
       final now = DateTime.now();
-      if (_pointerSignalLastUpdated == null ||
-          now.difference(_pointerSignalLastUpdated!).inMilliseconds > 500) {
+      if (_pointerSignalLastUpdated == null || now.difference(_pointerSignalLastUpdated!).inMilliseconds > 500) {
         _pointerSignalLastUpdated = now;
         _historyState.pushHistory(_readyState);
       }
@@ -764,8 +749,7 @@ class _CropEditorState extends State<_CropEditor> {
                 Positioned.fromRect(
                   rect: _readyState.cropRect,
                   child: IgnorePointer(
-                    child:
-                        widget.overlayBuilder!(context, _readyState.cropRect),
+                    child: widget.overlayBuilder!(context, _readyState.cropRect),
                   ),
                 ),
               IgnorePointer(
@@ -785,8 +769,7 @@ class _CropEditorState extends State<_CropEditor> {
                   left: _readyState.cropRect.left,
                   top: _readyState.cropRect.top,
                   child: GestureDetector(
-                    onPanStart: (details) =>
-                        _historyState.pushHistory(_readyState),
+                    onPanStart: (details) => _historyState.pushHistory(_readyState),
                     onPanUpdate: (details) => _updateCropRect(
                       _readyState.moveRect(details.delta),
                     ),
@@ -801,64 +784,52 @@ class _CropEditorState extends State<_CropEditor> {
                 left: _readyState.cropRect.left - (dotTotalSize / 2),
                 top: _readyState.cropRect.top - (dotTotalSize / 2),
                 child: GestureDetector(
-                  onPanStart: (details) =>
-                      _historyState.pushHistory(_readyState),
+                  onPanStart: (details) => _historyState.pushHistory(_readyState),
                   onPanUpdate: widget.fixCropRect
                       ? null
                       : (details) => _updateCropRect(
                             _readyState.moveTopLeft(details.delta),
                           ),
-                  child: widget.cornerDotBuilder
-                          ?.call(dotTotalSize, EdgeAlignment.topLeft) ??
-                      const DotControl(),
+                  child: widget.cornerDotBuilder?.call(dotTotalSize, EdgeAlignment.topLeft) ?? const DotControl(),
                 ),
               ),
               Positioned(
                 left: _readyState.cropRect.right - (dotTotalSize / 2),
                 top: _readyState.cropRect.top - (dotTotalSize / 2),
                 child: GestureDetector(
-                  onPanStart: (details) =>
-                      _historyState.pushHistory(_readyState),
+                  onPanStart: (details) => _historyState.pushHistory(_readyState),
                   onPanUpdate: widget.fixCropRect
                       ? null
                       : (details) => _updateCropRect(
                             _readyState.moveTopRight(details.delta),
                           ),
-                  child: widget.cornerDotBuilder
-                          ?.call(dotTotalSize, EdgeAlignment.topRight) ??
-                      const DotControl(),
+                  child: widget.cornerDotBuilder?.call(dotTotalSize, EdgeAlignment.topRight) ?? const DotControl(),
                 ),
               ),
               Positioned(
                 left: _readyState.cropRect.left - (dotTotalSize / 2),
                 top: _readyState.cropRect.bottom - (dotTotalSize / 2),
                 child: GestureDetector(
-                  onPanStart: (details) =>
-                      _historyState.pushHistory(_readyState),
+                  onPanStart: (details) => _historyState.pushHistory(_readyState),
                   onPanUpdate: widget.fixCropRect
                       ? null
                       : (details) => _updateCropRect(
                             _readyState.moveBottomLeft(details.delta),
                           ),
-                  child: widget.cornerDotBuilder
-                          ?.call(dotTotalSize, EdgeAlignment.bottomLeft) ??
-                      const DotControl(),
+                  child: widget.cornerDotBuilder?.call(dotTotalSize, EdgeAlignment.bottomLeft) ?? const DotControl(),
                 ),
               ),
               Positioned(
                 left: _readyState.cropRect.right - (dotTotalSize / 2),
                 top: _readyState.cropRect.bottom - (dotTotalSize / 2),
                 child: GestureDetector(
-                  onPanStart: (details) =>
-                      _historyState.pushHistory(_readyState),
+                  onPanStart: (details) => _historyState.pushHistory(_readyState),
                   onPanUpdate: widget.fixCropRect
                       ? null
                       : (details) => _updateCropRect(
                             _readyState.moveBottomRight(details.delta),
                           ),
-                  child: widget.cornerDotBuilder
-                          ?.call(dotTotalSize, EdgeAlignment.bottomRight) ??
-                      const DotControl(),
+                  child: widget.cornerDotBuilder?.call(dotTotalSize, EdgeAlignment.bottomRight) ?? const DotControl(),
                 ),
               ),
             ],
@@ -874,8 +845,8 @@ ImageDetail _parseFunc(List<dynamic> args) {
   return parser(args[2] as Uint8List, inputFormat: format);
 }
 
-/// top-level function for [compute]
-/// calls [ImageCropper.call] with given arguments
+/// Top-level function for [compute].
+/// Calls [ImageCropper.call] with the given arguments.
 FutureOr<Uint8List> _cropFunc(List<dynamic> args) {
   final cropper = args[0] as ImageCropper;
   final originalImage = args[1];
@@ -883,10 +854,18 @@ FutureOr<Uint8List> _cropFunc(List<dynamic> args) {
   final withCircleShape = args[3] as bool;
   final outputFormat = args[4] as ImageFormat;
 
+  // Avoid rounding errors
+  final adjustedRect = Rect.fromLTRB(
+    rect.left.floorToDouble(),
+    rect.top.floorToDouble(),
+    rect.right.ceilToDouble(),
+    rect.bottom.ceilToDouble(),
+  );
+
   return cropper.call(
     original: originalImage,
-    topLeft: Offset(rect.left, rect.top),
-    bottomRight: Offset(rect.right, rect.bottom),
+    topLeft: Offset(adjustedRect.left, adjustedRect.top),
+    bottomRight: Offset(adjustedRect.right, adjustedRect.bottom),
     shape: withCircleShape ? ImageShape.circle : ImageShape.rectangle,
     outputFormat: outputFormat,
   );
